@@ -1,0 +1,12 @@
+--- ./rpcs3/Emu/RSX/RSXThread.cpp
++++ ./rpcs3/Emu/RSX/RSXThread.cpp
+@@ -2439,6 +2439,8 @@
+ 				break;
+ 			}
+ 		}
++		else
++			value = g_cfg.video.zcull_default_value;
+ 
+ 		rsx::reservation_lock<true> lock(sink, 16);
+ 		vm::_ref<atomic_t<CellGcmReportData>>(sink).store({ timestamp(), value, 0});
+

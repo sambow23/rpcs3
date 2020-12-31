@@ -1,0 +1,55 @@
+--- ./rpcs3/Emu/system_config.h
++++ ./rpcs3/Emu/system_config.h
+@@ -42,6 +42,7 @@
+ 		cfg::_int<0, 16> spu_delay_penalty{ this, "SPU delay penalty", 3 }; // Number of milliseconds to block a thread if a virtual 'core' isn't free
+ 		cfg::_bool spu_loop_detection{ this, "SPU loop detection", true, true }; // Try to detect wait loops and trigger thread yield
+ 		cfg::_int<0, 6> max_spurs_threads{ this, "Max SPURS Threads", 6 }; // HACK. If less then 6, max number of running SPURS threads in each thread group.
++		cfg::_int<0, 4> spurs_urgent_queue_size{this, "SPURS Urgent queue size", 2}; // HACK. If not 0, max number of queued urgent SPURS commands per JobChain (default 4)
+ 		cfg::_enum<spu_block_size_type> spu_block_size{ this, "SPU Block Size", spu_block_size_type::safe };
+ 		cfg::_bool spu_accurate_getllar{ this, "Accurate GETLLAR", false, true };
+ 		cfg::_bool spu_accurate_dma{ this, "Accurate SPU DMA", false };
+@@ -58,7 +59,25 @@
+ 		cfg::_int<-1, 14> ppu_128_reservations_loop_max_length{ this, "Accurate PPU 128-byte Reservation Op Max Length", 0, true }; // -1: Always accurate, 0: Never accurate, 1-14: max accurate loop length
+ 		cfg::_bool llvm_ppu_accurate_vector_nan{ this, "PPU LLVM Accurate Vector NaN values", false };
+ 		cfg::_int<-64, 64> stub_ppu_traps{ this, "Stub PPU Traps", 0, true }; // Hack, skip PPU traps for rare cases where the trap is continueable (specify relative instructions to skip)
+-
++		cfg::_enum<spu_instruction_accuracy> spu_fcgt_accuracy{this, "FCGT accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fcmgt_accuracy{this, "FCMGT accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fm_accuracy{this, "FM accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fnms_accuracy{this, "FNMS accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fma_accuracy{this, "FMA accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fms_accuracy{this, "FMS accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_frest_accuracy{this, "FREST accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_frsqest_accuracy{this, "FRSQEST accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fi_accuracy{this, "FI accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fa_accuracy{this, "FA accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fs_accuracy{this, "FS accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fesd_accuracy{this, "FESD accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_frds_accuracy{this, "FRDS accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fceq_accuracy{this, "FCEQ accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_fcmeq_accuracy{this, "FCMEQ accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_cflts_accuracy{this, "CFLTS accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_cfltu_accuracy{this, "CFLTU accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_csflt_accuracy{this, "CSFLT accuracy", spu_instruction_accuracy::Default};
++		cfg::_enum<spu_instruction_accuracy> spu_cuflt_accuracy{this, "CUFLT accuracy", spu_instruction_accuracy::Default};
+ 		cfg::_bool debug_console_mode{ this, "Debug Console Mode", false }; // Debug console emulation, not recommended
+ 		cfg::_bool hook_functions{ this, "Hook static functions" };
+ 		cfg::set_entry libraries_control{ this, "Libraries Control" }; // Override HLE/LLE behaviour of selected libs
+@@ -129,6 +148,8 @@
+ 		cfg::_bool overlay{ this, "Debug overlay", false, true };
+ 		cfg::_bool gl_legacy_buffers{ this, "Use Legacy OpenGL Buffers" };
+ 		cfg::_bool use_gpu_texture_scaling{ this, "Use GPU texture scaling", false };
++		cfg::_bool reprotect_hack{ this, "Reprotect Hack", false };
++		cfg::_bool vk_event_hack{ this, "Vulkan Event Hack", false };
+ 		cfg::_bool stretch_to_display_area{ this, "Stretch To Display Area", false, true };
+ 		cfg::_bool force_high_precision_z_buffer{ this, "Force High Precision Z buffer" };
+ 		cfg::_bool strict_rendering_mode{ this, "Strict Rendering Mode" };
+@@ -143,6 +164,7 @@
+ 		cfg::_bool strict_texture_flushing{ this, "Strict Texture Flushing", false };
+ 		cfg::_bool disable_native_float16{ this, "Disable native float16 support", false };
+ 		cfg::_bool multithreaded_rsx{ this, "Multithreaded RSX", false };
++		cfg::_int<0, 0xFFFFFFFFu> zcull_default_value{this, "ZCull query default value", 1};
+ 		cfg::_bool relaxed_zcull_sync{ this, "Relaxed ZCULL Sync", false };
+ 		cfg::_bool enable_3d{ this, "Enable 3D", false };
+ 		cfg::_bool debug_program_analyser{ this, "Debug Program Analyser", false };
+

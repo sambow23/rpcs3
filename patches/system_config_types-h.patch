@@ -1,0 +1,16 @@
+--- ./rpcs3/Emu/system_config_types.h
++++ ./rpcs3/Emu/system_config_types.h
+@@ -20,6 +20,12 @@
+ 	safe,
+ 	mega,
+ 	giga,
++};
++enum class spu_instruction_accuracy
++{
++	Default,
++	approximate,
++	accurate,
+ };
+ 
+ enum class sleep_timers_accuracy_level
+
