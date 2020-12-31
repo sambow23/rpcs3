@@ -203,10 +203,40 @@ settings_dialog::settings_dialog(std::shared_ptr<gui_settings> gui_settings, std
 	m_emu_settings->EnhanceCheckBox(ui->spuLoopDetection, emu_settings_type::SPULoopDetection);
 	SubscribeTooltip(ui->spuLoopDetection, tooltips.settings.spu_loop_detection);
 
-	m_emu_settings->EnhanceCheckBox(ui->accurateXFloat, emu_settings_type::AccurateXFloat);
-	SubscribeTooltip(ui->accurateXFloat, tooltips.settings.accurate_xfloat);
-
 	// Comboboxes
+	ui->xfloatAccuracy->addItem(tr("Accurate"));
+	ui->xfloatAccuracy->addItem(tr("Approximate"));
+	ui->xfloatAccuracy->addItem(tr("Loose"));
+	{
+		std::string accurate_setting = m_emu_settings->GetSetting(emu_settings_type::AccurateXFloat);
+		if (accurate_setting != "true" && accurate_setting != "false")
+			accurate_setting = m_emu_settings->GetSettingDefault(emu_settings_type::AccurateXFloat);
+
+		std::string approximate_setting = m_emu_settings->GetSetting(emu_settings_type::ApproximateXFloat);
+		if (approximate_setting != "true" && approximate_setting != "false")
+			approximate_setting = m_emu_settings->GetSettingDefault(emu_settings_type::ApproximateXFloat);
+
+		if (accurate_setting == "true")
+			ui->xfloatAccuracy->setCurrentIndex(0);
+		else if (approximate_setting == "true")
+			ui->xfloatAccuracy->setCurrentIndex(1);
+		else
+			ui->xfloatAccuracy->setCurrentIndex(2);
+	}
+	QObject::connect(ui->xfloatAccuracy, static_cast<void (QComboBox::*)(int)>(&QComboBox::currentIndexChanged), [=](int index)
+	{
+		if (index == 0)
+			m_emu_settings->SetSetting(emu_settings_type::AccurateXFloat, "true");
+		else
+		{
+			m_emu_settings->SetSetting(emu_settings_type::AccurateXFloat, "false");
+			if (index == 1)
+				m_emu_settings->SetSetting(emu_settings_type::ApproximateXFloat, "true");
+			else
+				m_emu_settings->SetSetting(emu_settings_type::ApproximateXFloat, "false");
+		}
+	});
+	SubscribeTooltip(ui->xfloatAccuracy, tooltips.settings.accurate_xfloat);
 
 	m_emu_settings->EnhanceComboBox(ui->spuBlockSize, emu_settings_type::SPUBlockSize);
 	SubscribeTooltip(ui->gb_spuBlockSize, tooltips.settings.spu_block_size);
@@ -280,15 +310,15 @@ settings_dialog::settings_dialog(std::shared_ptr<gui_settings> gui_settings, std
 
 	connect(ui->spu_llvm, &QAbstractButton::toggled, [this](bool checked)
 	{
-		ui->accurateXFloat->setEnabled(checked);
+		ui->xfloatAccuracy->setEnabled(checked);
 	});
 
 	connect(ui->spu_fast, &QAbstractButton::toggled, [this](bool checked)
 	{
-		ui->accurateXFloat->setEnabled(checked);
+		ui->xfloatAccuracy->setEnabled(checked);
 	});
 
-	ui->accurateXFloat->setEnabled(ui->spu_llvm->isChecked() || ui->spu_fast->isChecked());
+	ui->xfloatAccuracy->setEnabled(ui->spu_llvm->isChecked() || ui->spu_fast->isChecked());
 
 #ifndef LLVM_AVAILABLE
 	ui->ppu_llvm->setEnabled(false);
@@ -1733,6 +1763,12 @@ settings_dialog::settings_dialog(std::shared_ptr<gui_settings> gui_settings, std
 	m_emu_settings->EnhanceCheckBox(ui->gpuTextureScaling, emu_settings_type::GPUTextureScaling);
 	SubscribeTooltip(ui->gpuTextureScaling, tooltips.settings.gpu_texture_scaling);
 
+	m_emu_settings->EnhanceCheckBox(ui->reprotect_hack, emu_settings_type::ReprotectHack);
+	SubscribeTooltip(ui->reprotect_hack, tooltips.settings.reprotect_hack);
+
+	m_emu_settings->EnhanceCheckBox(ui->vk_event_hack, emu_settings_type::VKEventHack);
+	SubscribeTooltip(ui->vk_event_hack, tooltips.settings.vk_event_hack);
+
 	// Checkboxes: core debug options
 	m_emu_settings->EnhanceCheckBox(ui->ppuDebug, emu_settings_type::PPUDebug);
 	SubscribeTooltip(ui->ppuDebug, tooltips.settings.ppu_debug);
@@ -1762,11 +1798,31 @@ settings_dialog::settings_dialog(std::shared_ptr<gui_settings> gui_settings, std
 	SubscribeTooltip(ui->perfReport, tooltips.settings.enable_performance_report);
 
 	// Comboboxes
-
 	m_emu_settings->EnhanceComboBox(ui->combo_accurate_ppu_128, emu_settings_type::AccuratePPU128Loop, true);
 	SubscribeTooltip(ui->gb_accurate_ppu_128, tooltips.settings.accurate_ppu_128_loop);
 	ui->combo_accurate_ppu_128->setItemText(ui->combo_accurate_ppu_128->findData(-1), tr("Always Enabled", "Accurate PPU 128 Reservations"));
 	ui->combo_accurate_ppu_128->setItemText(ui->combo_accurate_ppu_128->findData(0), tr("Disabled", "Accurate PPU 128 Reservations"));
+	
+	// Comboboxes: spu instructions accuracy
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFCGT, emu_settings_type::SPU_FCGT_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFCMGT, emu_settings_type::SPU_FCMGT_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFM, emu_settings_type::SPU_FM_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFNMS, emu_settings_type::SPU_FNMS_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFMA, emu_settings_type::SPU_FMA_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFMS, emu_settings_type::SPU_FMS_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFREST, emu_settings_type::SPU_FREST_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFRSQEST, emu_settings_type::SPU_FRSQEST_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFI, emu_settings_type::SPU_FI_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFA, emu_settings_type::SPU_FA_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFS, emu_settings_type::SPU_FS_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFESD, emu_settings_type::SPU_FESD_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFRDS, emu_settings_type::SPU_FRDS_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFCEQ, emu_settings_type::SPU_FCEQ_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyFCMEQ, emu_settings_type::SPU_FCMEQ_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyCFLTS, emu_settings_type::SPU_CFLTS_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyCFLTU, emu_settings_type::SPU_CFLTU_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyCSFLT, emu_settings_type::SPU_CSFLT_Accuracy);
+	m_emu_settings->EnhanceComboBox(ui->spuAccuracyCUFLT, emu_settings_type::SPU_CUFLT_Accuracy);
 
 	// Layout fix for High Dpi
 	layout()->setSizeConstraint(QLayout::SetFixedSize);

@@ -21,6 +21,12 @@ enum class spu_block_size_type
 	mega,
 	giga,
 };
+enum class spu_instruction_accuracy
+{
+	Default,
+	approximate,
+	accurate,
+};
 
 enum class sleep_timers_accuracy_level
 {
